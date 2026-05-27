@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>
+Dashboard | Live Attack Counter: 
+<span id="attackCounter" style="color:red;font-weight:bold;">0</span>
+</h2>
+
+<div class="card" style="margin-bottom:20px;">
+<h3>System Security Status</h3>
+
+<span id="systemStatus" style="font-size:20px;font-weight:bold;color:green;">
+🟢 System Secure
+</span>
+
+</div>
+
+<div id="alertBanner" style="display:none;background:red;color:white;padding:12px;margin-bottom:20px;border-radius:8px;">
+<strong>⚠ LIVE ATTACK DETECTED</strong>
+<span id="alertText"></span>
+</div>
+
+<div class="grid">
+
+<div class="card">
+<h3>Total Detections</h3>
+<p>{{ total }}</p>
+</div>
+
+<div class="card">
+<h3>Total Attacks</h3>
+<p>{{ attacks }}</p>
+</div>
+
+{% if role == "admin" %}
+
+<div class="card">
+<h3>Total Users</h3>
+<p>{{ users }}</p>
+</div>
+{% endif %}
+
+</div>
+
+<div class="card">
+<h3>Real Time Network Activity</h3>
+<canvas id="attackChart"></canvas>
+</div>
+
+<div class="card">
+<h3>Top Attacking IPs</h3>
+<table id="attackersTable">
+<tr>
+<th>IP Address</th>
+<th>Attack Count</th>
+</tr>
+</table>
+</div>
+
+<div class="card">
+<h3>Institution Network Attack Heatmap</h3>
+
+<table id="heatmapTable">
+<tr>
+<th>Network Segment</th>
+<th>Attack Level</th>
+</tr>
+</table>
+
+</div>
+
+<div class="card">
+<h3>Global Attack Map</h3>
+<div id="map" style="height:400px;"></div>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+let ctx = document.getElementById("attackChart").getContext("2d");
+
+let chart = new Chart(ctx,{
+type:"line",
+data:{
+labels:[],
+datasets:[{
+label:"Attack Activity Over Time",
+data:[],
+fill:false,
+borderWidth:2
+}]
+},
+options:{
+responsive:true,
+scales:{
+y:{
+beginAtZero:true
+}
+}
+}
+});
+
+function updateChart(){
+
+fetch("/chart_data")
+.then(res=>res.json())
+.then(data=>{
+
+let now = new Date().toLocaleTimeString()
+
+chart.data.labels.push(now)
+chart.data.datasets[0].data.push(data.attacks)
+
+if(chart.data.labels.length > 10){
+chart.data.labels.shift()
+chart.data.datasets[0].data.shift()
+}
+
+chart.update()
+
+})
+
+}
+
+updateChart()
+
+setInterval(updateChart,5000)
+
+</script>
+
+<script>
+
+function checkAlerts(){
+fetch("/live_alerts")
+.then(res=>res.json())
+.then(data=>{
+if(data.attack){
+
+const banner=document.getElementById("alertBanner")
+const text=document.getElementById("alertText")
+
+banner.style.display="block"
+
+text.innerHTML=" Attack: "+data.attack+" | Source IP: "+data.ip+" | Time: "+data.time
+}
+})
+}
+
+checkAlerts()
+
+setInterval(checkAlerts,4000)
+
+</script>
+
+<script>
+
+function loadAttackers(){
+
+fetch("/top_attackers")
+.then(res=>res.json())
+.then(data=>{
+
+const table=document.getElementById("attackersTable")
+
+table.innerHTML="<tr><th>IP Address</th><th>Attack Count</th></tr>"
+
+data.data.forEach(row=>{
+table.innerHTML += "<tr><td>"+row[0]+"</td><td>"+row[1]+"</td></tr>"
+})
+
+})
+}
+
+loadAttackers()
+
+setInterval(loadAttackers,5000)
+
+</script>
+
+<script>
+
+function loadHeatmap(){
+
+fetch("/network_heatmap")
+.then(res=>res.json())
+.then(data=>{
+
+const table=document.getElementById("heatmapTable")
+
+table.innerHTML="<tr><th>Network Segment</th><th>Attack Level</th></tr>"
+
+for(const ip in data.data){
+
+let attacks=data.data[ip]
+
+let color="green"
+
+if(attacks>5) color="orange"
+if(attacks>10) color="red"
+
+table.innerHTML += "<tr><td>"+ip+"</td><td style='color:"+color+"'>"+attacks+"</td></tr>"
+
+}
+
+})
+
+}
+
+loadHeatmap()
+
+setInterval(loadHeatmap,5000)
+
+</script>
+
+<script>
+
+function updateAttackCounter(){
+
+fetch("/chart_data")
+.then(res=>res.json())
+.then(data=>{
+
+let attacks=data.attacks
+
+document.getElementById("attackCounter").innerText=attacks
+
+})
+
+}
+
+updateAttackCounter()
+
+setInterval(updateAttackCounter,3000)
+
+</script>
+
+<script>
+
+function updateSystemStatus(){
+
+fetch("/chart_data")
+.then(res=>res.json())
+.then(data=>{
+
+let attacks=data.attacks
+let status=document.getElementById("systemStatus")
+
+if(attacks==0){
+status.innerHTML="🟢 System Secure"
+status.style.color="green"
+}
+
+else if(attacks<=5){
+status.innerHTML="🟠 Suspicious Activity"
+status.style.color="orange"
+}
+
+else{
+status.innerHTML="🔴 Attack Detected"
+status.style.color="red"
+}
+
+})
+
+}
+
+updateSystemStatus()
+
+setInterval(updateSystemStatus,4000)
+
+</script>
+
+<script>
+
+let map = L.map('map').setView([20,0],2)
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+maxZoom:18
+}).addTo(map)
+
+function loadAttackMap(){
+
+fetch("/attack_map")
+.then(res=>res.json())
+.then(data=>{
+
+data.locations.forEach(loc=>{
+
+L.circleMarker([loc.lat,loc.lon],{
+radius:8
+}).addTo(map)
+.bindPopup("Attack from "+loc.country)
+
+})
+
+})
+
+}
+
+loadAttackMap()
+
+</script>
+
+<script>
+
+function simulateAttack() {
+
+fetch("/simulate_attack")
+.then(response => response.json())
+.then(data => {
+console.log("Attack simulated");
+})
+
+}
+
+</script>
+
+<script>
+
+setInterval(function(){
+
+fetch("/simulate_attack")
+.then(response => response.json())
+.then(data=>{
+console.log("Auto attack generated")
+})
+
+},10000)
+
+</script>
+
+{% endblock %}

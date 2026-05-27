@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>CSV Batch Detection</h2>
+
+<form method="POST" enctype="multipart/form-data" class="card">
+    <input type="file" name="file" required>
+    <button class="glow-btn">Upload & Analyze</button>
+</form>
+
+{% if summary %}
+<div class="card">
+    <h3>Detection Summary</h3>
+    <p>Total Records: {{ summary.total }}</p>
+    <p>Normal: {{ summary.normal }}</p>
+    <p>Anomaly: {{ summary.anomaly }}</p>
+    <p>Signature: {{ summary.signature }}</p>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>System Activity Logs</h2>
+
+<a href="/clear_logs" onclick="return confirm('Clear all logs?')">
+<button style="background:red;color:white;padding:8px 15px;border:none;">
+Clear Logs
+</button>
+</a>
+
+<table class="card">
+    <tr>
+        <th>ID</th>
+        <th>Timestamp</th>
+        <th>Action</th>
+        <th>User</th>
+    </tr>
+
+    {% for log in logs %}
+    <tr>
+        <td>{{ log[0] }}</td>
+        <td>{{ log[1] }}</td>
+        <td>{{ log[2] }}</td>
+        <td>{{ log[3] }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

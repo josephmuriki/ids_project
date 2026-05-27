@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+
+<a href="/export_csv" class="glow-btn">Export CSV</a>
+<a href="/export_pdf" class="glow-btn">Export PDF</a>
+
+<h2>Detection Logs</h2>
+
+<table class="card">
+    <tr>
+        <th>ID</th>
+        <th>Timestamp</th>
+        <th>Source</th>
+        <th>Result</th>
+        <th>Score</th>
+        <th>User</th>
+    </tr>
+
+    {% for row in data %}
+    <tr>
+        <td>{{ row[0] }}</td>
+        <td>{{ row[1] }}</td>
+        <td>{{ row[2] }}</td>
+        <td>{{ row[3] }}</td>
+        <td>{{ row[4] }}</td>
+        <td>{{ row[5] }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

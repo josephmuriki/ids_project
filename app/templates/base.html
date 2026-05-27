@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hybrid IDS</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<div class="navbar">
+    <div class="logo">HYBRID IDS</div>
+    <div class="nav-links">
+        {% if session.get("user") %}
+            <a href="/dashboard">Dashboard</a>
+            <a href="/prediction">Manual Detection</a>
+            <a href="/upload_csv">CSV Upload</a>
+            <a href="/incidents">Incidents</a>
+            {% if session.get("role") == "admin" %}
+                <a href="/admin">Admin</a>
+                <a href="/users">Users</a>
+            {% endif %}
+            <a href="/logout">Logout</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container">
+    {% block content %}{% endblock %}
+</div>
+
+</body>
+</html>

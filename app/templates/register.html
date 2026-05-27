@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<div class="center-box">
+    <h2>Create Account</h2>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <p class="error">{{ messages[0] }}</p>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        <input name="fullname" placeholder="Full Name" required>
+        <input name="email" placeholder="Email" required>
+        <input name="username" placeholder="Username" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button class="glow-btn">Register</button>
+    </form>
+
+    <p>Back to <a href="/login">Login</a></p>
+</div>
+
+</body>
+</html>

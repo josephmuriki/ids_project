@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Manual Detection</h2>
+
+<form method="POST" class="card">
+    {% for i in range(10) %}
+        <input name="values" placeholder="Feature {{ i+1 }}" required>
+    {% endfor %}
+    <button class="glow-btn">Run Detection</button>
+</form>
+
+{% if result %}
+<div class="card">
+    <h3>Result</h3>
+    <p>{{ result }}</p>
+</div>
+{% endif %}
+
+{% endblock %}

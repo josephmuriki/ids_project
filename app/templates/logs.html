@@ -1,0 +1,26 @@
+logs.html
+.......................................
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Event Logs</h2>
+
+<a href="/clear_logs"
+onclick="return confirm('Clear all logs?')"
+class="glow-btn">
+Clear Logs
+</a>
+
+<table>
+<tr><th>Time</th><th>Prediction</th><th>Confidence</th><th>Severity</th></tr>
+{% for e in events %}
+<tr>
+<td>{{e.time}}</td>
+<td>{{e.prediction}}</td>
+<td>{{e.confidence}}</td>
+<td>{{e.severity}}</td>
+</tr>
+{% endfor %}
+</table>
+
+{% endblock %}
