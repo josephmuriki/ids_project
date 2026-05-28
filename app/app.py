@@ -48,7 +48,7 @@ def fix_input_size(values):
         values = values[:EXPECTED_FEATURES]
     return values
 
-# ---------------- DATABASE ----------------
+# DATABASE 
 
 def init_db():
     conn = get_db_connection()
@@ -105,12 +105,12 @@ def init_db():
 
     conn.close()
 
-# ---------------- MODEL ----------------
+# MODEL 
 
 import joblib
 model = joblib.load("../models/ids_model.pkl")
 
-# ---------------- HYBRID DETECTION ----------------
+# HYBRID DETECTION 
 
 def signature_check(values):
     try:
@@ -179,7 +179,7 @@ def preprocess_row(row):
 
     return processed
 
-# ---------------- DATA PREPROCESSING ----------------
+# DATA PREPROCESSING
 
 def log_detection(source, result, score, username):
     conn = get_db_connection()
@@ -201,7 +201,7 @@ def log_activity(action, username):
     conn.commit()
     conn.close()
 
-# ---------------- AUTH ROUTES ----------------
+# AUTH ROUTES
 
 @app.route("/")
 def index():
@@ -266,7 +266,7 @@ def logout():
     session.clear()
     return redirect("/login")
 
-# ---------------- DASHBOARD ----------------
+# DASHBOARD
 
 @app.route("/dashboard")
 def dashboard():
@@ -289,7 +289,7 @@ def dashboard():
                            users=users,
                            role=session["role"])
 
-# ---------------- MANUAL PREDICTION ----------------
+# MANUAL PREDICTION 
 
 @app.route("/prediction", methods=["GET","POST"])
 def prediction():
@@ -309,7 +309,7 @@ def prediction():
 
     return render_template("prediction.html", result=result)
 
-# ---------------- CSV UPLOAD ----------------
+# CSV UPLOAD
 
 @app.route("/upload_csv", methods=["GET","POST"])
 def upload_csv():
@@ -320,7 +320,7 @@ def upload_csv():
 
     if request.method == "POST":
         try:
-            # ---------------- FILE VALIDATION ----------------
+            # FILE VALIDATION 
             if "file" not in request.files:
                 flash("No file uploaded")
                 return render_template("upload_csv.html", summary=None)
@@ -335,28 +335,28 @@ def upload_csv():
                 flash("Only CSV files are allowed")
                 return render_template("upload_csv.html", summary=None)
 
-            # ---------------- READ CSV ----------------
+            # READ CSV 
             df = pd.read_csv(file)
 
-            # ---------------- DROP LABEL COLUMN (IMPORTANT) ----------------
+            # DROP LABEL COLUMN
             if "Label" in df.columns:
                 df = df.drop(columns=["Label"])
 
-            # ---------------- ENSURE NUMERIC DATA ----------------
+            #  ENSURE NUMERIC DATA
             # Convert all columns to numeric safely
             df = df.apply(pd.to_numeric, errors='coerce')
 
             # Fill missing values
             df = df.fillna(0)
 
-            # ---------------- VALIDATE FEATURE SIZE ----------------
+            # VALIDATE FEATURE SIZE
             EXPECTED_FEATURES = 78  # CICIDS model
 
             if df.shape[1] != EXPECTED_FEATURES:
                 flash(f"Invalid CSV format. Expected {EXPECTED_FEATURES} features, got {df.shape[1]}")
                 return render_template("upload_csv.html", summary=None)
 
-            # ---------------- DETECTION ----------------
+            # DETECTION
             normal = anomaly = signature = 0
 
             for _, row in df.iterrows():
@@ -378,7 +378,7 @@ def upload_csv():
                     # If one row fails, log but continue
                     log_detection("csv", "Invalid Input", 0.0, session["user"])
 
-            # ---------------- SUMMARY ----------------
+            #  SUMMARY
             summary = {
                 "total": len(df),
                 "normal": normal,
@@ -391,7 +391,7 @@ def upload_csv():
             flash("Invalid CSV file or corrupted format.")
 
     return render_template("upload_csv.html", summary=summary)
-# ---------------- INCIDENTS ----------------
+# INCIDENTS
 
 @app.route("/incidents")
 def incidents():
@@ -406,7 +406,7 @@ def incidents():
 
     return render_template("incidents.html", data=data)
 
-# ---------------- ADMIN ----------------
+# ADMIN
 
 @app.route("/admin")
 def admin():
@@ -434,7 +434,7 @@ def users():
 
     return render_template("users.html", users=users)
 
-# ---------------- USER DELETE ----------------
+# USER DELETE
 
 @app.route("/delete_user/<int:user_id>")
 def delete_user(user_id):
@@ -457,7 +457,7 @@ def delete_user(user_id):
 
     return redirect("/users")
 
-# ---------------- CLEAR LOGS ----------------
+# CLEAR LOGS
 
 @app.route("/clear_logs")
 def clear_logs():
@@ -479,7 +479,7 @@ def clear_logs():
 
     return redirect("/admin")
 
-# ---------------- CHART DATA ----------------
+# CHART DATA
 
 @app.route("/chart_data")
 def chart_data():
@@ -508,8 +508,7 @@ def chart_data():
 
     return {"normal": normal, "attacks": attacks}
 
-# ---------------- TOP ATTACKERS ----------------
-
+# TOP ATTACKERS
 @app.route("/top_attackers")
 def top_attackers():
 
@@ -530,7 +529,7 @@ def top_attackers():
 
     return {"data": rows}
 
-# ---------------- EXPORT CSV ----------------
+# EXPORT CSV
 
 @app.route("/export_csv")
 def export_csv():
@@ -558,7 +557,7 @@ def export_csv():
         flash("CSV export failed")
         return redirect("/incidents")
 
-# ---------------- EXPORT PDF ----------------
+# EXPORT PDF
 
 @app.route("/export_pdf")
 def export_pdf():
@@ -590,7 +589,7 @@ def export_pdf():
         flash("PDF export failed")
         return redirect("/incidents")
 
-# ---------------- LIVE ALERTS ----------------
+# LIVE ALERTS
 
 @app.route("/live_alerts")
 def live_alerts():
@@ -614,7 +613,7 @@ def live_alerts():
 
     return {"attack": None}
 
-# ---------------- NETWORK HEATMAP ----------------
+# NETWORK HEATMAP
 
 @app.route("/network_heatmap")
 def network_heatmap():
