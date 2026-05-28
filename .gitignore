@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+
+*.db
+*.db-shm
+*.db-wal
+
+*.pkl
+*.csv
+*.parquet
+
+data/
+models/
+venv/
+.env
